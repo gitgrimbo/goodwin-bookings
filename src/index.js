@@ -53,6 +53,41 @@ class Session {
       qs,
     });
   }
+
+  /**
+  Sample response.
+  [
+    {"documentId":null,"booked":false,"id":"SQ01","productId":"SQ01","productIds":null,"activityId":"WEBSQ",
+      "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ01","color":"#FFD24F","name":"Squash Court 1",
+      "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+    {"documentId":null,"booked":false,"id":"SQ02","productId":"SQ02","productIds":null,"activityId":"WEBSQ",
+      "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ02","color":"#FFD24F","name":"Squash Court 2",
+      "count":0,"iconName":"squash1","places":"1","price":7,"available":true,"shortName":null,"colorMode":"dark",
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+    {"documentId":null,"booked":false,"id":"SQ03","productId":"SQ03","productIds":null,"activityId":"WEBSQ",
+      "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ03","color":"#FFD24F","name":"Squash Court 3",
+      "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+    {"documentId":null,"booked":false,"id":"SQ04","productId":"SQ04","productIds":null,"activityId":"WEBSQ",
+      "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ04","color":"#FFD24F","name":"Squash Court 4",
+      "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false}
+  ]
+  */
+  async getCourtAvailablility(start = "2019-03-02T08:00:00", end = "2019-03-02T08:40:00") {
+    // TODO - this gets availability of courts at a particular time
+    const qs = {
+      "linkedPlus2Id": "",
+      start,
+      end,
+      group: false,
+    };
+    return await this.req({
+      uri: "https://www.sport-sheffield.com/online/bookings/slots/WEBSQ",
+      qs,
+    });
+  }
 }
 
 module.exports = Session;
