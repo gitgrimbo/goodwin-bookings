@@ -55,17 +55,24 @@ package:
 
 functions:
   getBookings:
-    handler: src/handler.getBookings
+    handler: src/lambda/handler.getBookings
     memorySize: 128
     timeout: 20
     events:
       - http:
           path: /getBookings
-          method: get
+          method: post
           cors: true
-    environment:
-      sports_sheffield_email: ${env:sports_sheffield_email}
-      sports_sheffield_password: ${env:sports_sheffield_password}
+
+  logger:
+    handler: src/lambda/handler.logger
+    memorySize: 128
+    timeout: 20
+    events:
+      - http:
+          path: /logger
+          method: post
+          cors: true
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
 #    Check the event documentation for details

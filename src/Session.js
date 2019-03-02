@@ -5,6 +5,11 @@ class Session {
     // use separate cookie jar for each session
     this.jar = rpn.jar();
     this.req = rpn.defaults({ jar: this.jar });
+    this.host = "https://www.sport-sheffield.com";
+  }
+
+  uri(path) {
+    return this.host + path;
   }
 
   getRequestVerificationToken(html) {
@@ -18,7 +23,7 @@ class Session {
   }
 
   async login(email, password) {
-    const loginHtml = await this.req("https://www.sport-sheffield.com/online/account/login");
+    const loginHtml = await this.req(this.uri("/online/account/login"));
 
     const requestVerificationToken = this.getRequestVerificationToken(loginHtml);
     if (!requestVerificationToken) {
@@ -29,27 +34,27 @@ class Session {
 
     const loginResult = await this.req({
       method: "POST",
-      uri: "https://www.sport-sheffield.com/online/account/login",
+      uri: this.uri("/online/account/login"),
       form: {
-        "__RequestVerificationToken": requestVerificationToken,
-        "ReturnUrl": "/online/bookings/",
-        "Email": email,
-        "Password": password,
+        __RequestVerificationToken: requestVerificationToken,
+        ReturnUrl: "/online/bookings/",
+        Email: email,
+        Password: password,
       },
     });
 
     return loginResult;
   }
 
-  async getBookings(start = "2019-03-01", end = "2019-03-08") {
+  async getBookings(activityCode = "WEBSQ", start = "2019-03-01", end = "2019-03-08") {
     const qs = {
-      "linkedPlus2Id": "",
+      linkedPlus2Id: "",
       start,
       end,
-      "_": Date.now(),
+      _: Date.now(),
     };
     return await this.req({
-      uri: "https://www.sport-sheffield.com/online/bookings/slots/WEBSQ",
+      uri: this.uri(`/online/bookings/slots/${activityCode}`),
       qs,
     });
   }
@@ -75,16 +80,29 @@ class Session {
       "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false}
   ]
   */
-  async getCourtAvailablility(start = "2019-03-02T08:00:00", end = "2019-03-02T08:40:00") {
+  async getCourtAvailablility(activityCode = "WEBSQ", start = "2019-03-02T08:00:00", end = "2019-03-02T08:40:00") {
     // TODO - this gets availability of courts at a particular time
     const qs = {
-      "linkedPlus2Id": "",
+      linkedPlus2Id: "",
       start,
       end,
       group: false,
     };
     return await this.req({
-      uri: "https://www.sport-sheffield.com/online/bookings/slots/WEBSQ",
+      uri: this.uri(`/online/bookings/slots/${activityCode}`),
+      qs,
+    });
+  }
+
+  async getActivityGroups() {
+    const NORTON_PLAYING_FIELDS = "NPF";
+    const GOODWIN = "HO";
+    const location = GOODWIN;
+    const qs = {
+      linkedPlus2Id: "",
+    };
+    return this.req({
+      uri: this.uri(`/online/bookings/activitygroups/${location}`),
       qs,
     });
   }

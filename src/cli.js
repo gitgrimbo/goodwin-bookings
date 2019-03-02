@@ -1,4 +1,4 @@
-const Session = require("./index");
+const Session = require("./Session");
 
 async function main() {
   const ENV_EMAIL = "sports_sheffield_email";
