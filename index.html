@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Goodwin Bookings</title>
+  <style>
+    html,
+    body {
+      font-family: Tahoma;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      padding: 1em;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="App"></div>
+</body>
+
+<script src="https://unpkg.com/react@16.8.1/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16.8.1/umd/react-dom.development.js"></script>
+<!--
+<script src="https://unpkg.com/react@16.8.1/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@16.8.1/umd/react-dom.production.min.js"></script>
+-->
+<script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+<script src="./main.js" type="text/babel"></script>
+<script type="text/babel">
+const bookingsEndpoint = location.hostname === "localhost" ? "./squash.json" : undefined;
+console.log(bookingsEndpoint);
+ReactDOM.render(<App bookingsEndpoint={bookingsEndpoint}/>, document.getElementById("App"));
+</script>
+
+</html>
