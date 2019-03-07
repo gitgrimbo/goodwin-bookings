@@ -125,7 +125,7 @@
   function App({
     bookingsEndpoint,
   }) {
-    const prodEndpoint = "https://bidpb9yb04.execute-api.eu-west-2.amazonaws.com/prod/getBookings";
+    const prodEndpoint = "https://1e53hmg02i.execute-api.eu-west-2.amazonaws.com/prod/getBookings";
     bookingsEndpoint = bookingsEndpoint || prodEndpoint;
 
     const [email, setEmail] = React.useState("");
