@@ -1,4 +1,11 @@
-const Session = require("../Session");
+const {
+  Session,
+  ACTIVITY_CODES,
+} = require("../Session");
+
+function daysToMillis(days = 7) {
+  return days * 24 * 60 * 60 * 1000;
+}
 
 function addCorsHeaders(headers = {}) {
   headers = {
@@ -33,7 +40,7 @@ async function _getBookings(event, context) {
   const ENV_EMAIL = "sports_sheffield_email";
   const ENV_PASSWORD = "sports_sheffield_password";
 
-  const session = new Session();
+  const session = Session.withRealTransport();
 
   const body = JSON.parse(event.body || "{}");
 
@@ -51,7 +58,13 @@ async function _getBookings(event, context) {
   const loginResult = await session.login(body.email || email, body.password || password);
   console.log(loginResult);
 
-  const bookingsStr = await session.getBookings();
+  const startMillis = Date.now();
+  const endMillis = startMillis + daysToMillis(7);
+  const bookingsStr = await session.getBookings({
+    activityCode: ACTIVITY_CODES.WEBSQ,
+    startMillis,
+    endMillis,
+  });
   try {
     const bookings = JSON.parse(bookingsStr);
     console.log(`Found ${bookings.length} bookings`);

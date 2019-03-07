@@ -1,4 +1,11 @@
-const Session = require("./Session");
+const {
+  Session,
+  ACTIVITY_CODES,
+} = require("./Session");
+
+function daysToMillis(days = 7) {
+  return days * 24 * 60 * 60 * 1000;
+}
 
 async function main() {
   const ENV_EMAIL = "sports_sheffield_email";
@@ -14,18 +21,23 @@ async function main() {
     throw new Error(`Need env var: "${ENV_PASSWORD}"`);
   }
 
-  const session = new Session();
+  const session = Session.withRealTransport();
 
   const loginResult = await session.login(email, password);
   console.log(loginResult);
 
-  const bookings = await session.getBookings();
+  const startMillis = Date.now();
+  const endMillis = startMillis + daysToMillis(7);
+  const bookings = await session.getBookings({
+    activityCode: ACTIVITY_CODES.WEBSQ,
+    startMillis,
+    endMillis,
+  });
   console.log(bookings);
 }
 
 (async () => {
   try {
-    await main();
     await main();
   } catch (err) {
     console.error(err);

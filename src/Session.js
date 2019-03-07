@@ -1,11 +1,27 @@
 const rpn = require("request-promise-native");
 
+const ACTIVITY_CODES = {
+  WEBSQ: "WEBSQ",
+};
+
 class Session {
   constructor() {
+  }
+
+  static withRealTransport() {
+    const s = new Session();
     // use separate cookie jar for each session
-    this.jar = rpn.jar();
-    this.req = rpn.defaults({ jar: this.jar });
-    this.host = "https://www.sport-sheffield.com";
+    s.jar = rpn.jar();
+    s.req = rpn.defaults({ jar: s.jar });
+    s.host = "https://www.sport-sheffield.com";
+    return s;
+  }
+
+  static withDummyTransport(req) {
+    const s = new Session();
+    s.req = req;
+    s.host = "https://www.sport-sheffield.com";
+    return s;
   }
 
   uri(path) {
@@ -46,7 +62,13 @@ class Session {
     return loginResult;
   }
 
-  async getBookings(activityCode = "WEBSQ", start = "2019-03-01", end = "2019-03-08") {
+  async _getBookings({
+    activityCode = "WEBSQ",
+    start = undefined,
+    end = undefined,
+  }) {
+    if (!start) throw new Error(`start is mandatory`);
+    if (!end) throw new Error(`end is mandatory`);
     const qs = {
       linkedPlus2Id: "",
       start,
@@ -56,6 +78,40 @@ class Session {
     return await this.req({
       uri: this.uri(`/online/bookings/slots/${activityCode}`),
       qs,
+    });
+  }
+
+  dateParam(dateStr, dateStrParamName, millis, millisParamName) {
+    if (dateStr) {
+      return dateStr;
+    }
+    if (millis) {
+      return new Date(millis).toISOString().substring(0, 10);
+    }
+    throw new Error(`either ${dateStrParamName} or ${millisParamName} is required`);
+  }
+
+  requiredParam(value, name) {
+    if (typeof value === "undefined") {
+      throw new Error(`${name} is required`);
+    }
+    return value;
+  }
+
+  async getBookings({
+    activityCode = undefined,
+    start = undefined,
+    end = undefined,
+    startMillis = undefined,
+    endMillis = undefined,
+  }) {
+    activityCode = this.requiredParam(activityCode, "activityCode");
+    start = this.dateParam(start, "start", startMillis, "startMillis");
+    end = this.dateParam(end, "end", endMillis, "endMillis");
+    return this._getBookings({
+      activityCode,
+      start,
+      end,
     });
   }
 
@@ -108,4 +164,7 @@ class Session {
   }
 }
 
-module.exports = Session;
+module.exports = {
+  Session,
+  ACTIVITY_CODES,
+};
