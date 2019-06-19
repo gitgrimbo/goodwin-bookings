@@ -1,5 +1,8 @@
 const { expect } = require("chai");
-const Session = require("../Session");
+const {
+  Session,
+  ACTIVITY_CODES,
+} = require("../Session");
 
 function dummyTransport() {
   let args;
@@ -27,6 +30,7 @@ describe("Session", function() {
     const start = "2019-01-01";
     const end = "2019-01-08";
     s.getBookings({
+      activityCode: ACTIVITY_CODES.WEBSQ,
       startMillis: new Date(start).getTime(),
       endMillis: new Date(end).getTime(),
     });
