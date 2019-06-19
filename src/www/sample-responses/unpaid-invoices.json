@@ -1,0 +1,33 @@
+{
+  "error": {
+    "message": "Possible unpaid invoices",
+    "payload": [
+      {
+        "documentId": null,
+        "booked": false,
+        "id": "",
+        "productId": null,
+        "productIds": null,
+        "activityId": "WEBSQ",
+        "start": "2019-06-19T13:15:05",
+        "end": "2019-06-26T00:00:00",
+        "type": "",
+        "color": "#FFD24F",
+        "name": "Squash Court - Web",
+        "count": 1,
+        "iconName": "squash1",
+        "places": "1",
+        "price": null,
+        "available": false,
+        "shortName": null,
+        "colorMode": "dark",
+        "paid": false,
+        "resourceGroupId": 0,
+        "location": null,
+        "description": null,
+        "canCancelUntil": null,
+        "cantBeCancelled": false
+      }
+    ]
+  }
+}

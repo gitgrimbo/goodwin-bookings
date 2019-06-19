@@ -62,6 +62,18 @@ class Session {
     return loginResult;
   }
 
+  /**
+   * Gets the bookings as a raw string.
+   * 
+   * @param {*} {
+   *     activityCode = "WEBSQ",
+   *     start = undefined,
+   *     end = undefined,
+   *   }
+   * @returns {string} The raw bookings response.
+   * 
+   * @memberof Session
+   */
   async _getBookings({
     activityCode = "WEBSQ",
     start = undefined,
@@ -75,7 +87,7 @@ class Session {
       end,
       _: Date.now(),
     };
-    return await this.req({
+    return this.req({
       uri: this.uri(`/online/bookings/slots/${activityCode}`),
       qs,
     });
@@ -98,6 +110,54 @@ class Session {
     return value;
   }
 
+  /**
+  Sample response that hints at unpaid invoices.
+
+  - "id" === "".
+  - "end" is more than 40 mins after start (for squash).
+
+  [
+    {
+      "documentId": null,
+      "booked": false,
+      "id": "",
+      "productId": null,
+      "productIds": null,
+      "activityId": "WEBSQ",
+      "start": "2019-06-19T13:15:05",
+      "end": "2019-06-26T00:00:00",
+      "type": "",
+      "color": "#FFD24F",
+      "name": "Squash Court - Web",
+      "count": 1,
+      "iconName": "squash1",
+      "places": "1",
+      "price": null,
+      "available": false,
+      "shortName": null,
+      "colorMode": "dark",
+      "paid": false,
+      "resourceGroupId": 0,
+      "location": null,
+      "description": null,
+      "canCancelUntil": null,
+      "cantBeCancelled": false
+    }
+  ]
+  */
+  isUnpaidInvoicesResponse(bookings) {
+    if (!Array.isArray(bookings)) {
+      return false;
+    }
+
+    if (bookings.length !== 1) {
+      return false;
+    }
+
+    const [b] = bookings;
+    return (b.id === "");
+  }
+
   async getBookings({
     activityCode = undefined,
     start = undefined,
@@ -108,32 +168,59 @@ class Session {
     activityCode = this.requiredParam(activityCode, "activityCode");
     start = this.dateParam(start, "start", startMillis, "startMillis");
     end = this.dateParam(end, "end", endMillis, "endMillis");
-    return this._getBookings({
+
+    const bookingsStr = await this._getBookings({
       activityCode,
       start,
       end,
     });
+
+    let bookings = null;
+    try {
+      bookings = JSON.parse(bookingsStr);
+    } catch (err) {
+      console.error("bookingsStr", bookingsStr, err);
+      const e = new Error("Could not parse bookings JSON");
+      e.data = bookingsStr;
+      throw e;
+    }
+
+    if (this.isUnpaidInvoicesResponse(bookings)) {
+      const e = new Error("Possible unpaid invoices");
+      e.data = bookings;
+      throw e;
+    }
+
+    return bookings;
   }
 
   /**
-  Sample response.
+  Sample good response.
+
+  - "id" is the id of the individual squash court.
+  - "name" is the name of the individual squash court.
+
   [
     {"documentId":null,"booked":false,"id":"SQ01","productId":"SQ01","productIds":null,"activityId":"WEBSQ",
       "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ01","color":"#FFD24F","name":"Squash Court 1",
       "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
-      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false
+    },
     {"documentId":null,"booked":false,"id":"SQ02","productId":"SQ02","productIds":null,"activityId":"WEBSQ",
       "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ02","color":"#FFD24F","name":"Squash Court 2",
       "count":0,"iconName":"squash1","places":"1","price":7,"available":true,"shortName":null,"colorMode":"dark",
-      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false
+    },
     {"documentId":null,"booked":false,"id":"SQ03","productId":"SQ03","productIds":null,"activityId":"WEBSQ",
       "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ03","color":"#FFD24F","name":"Squash Court 3",
       "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
-      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false},
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false
+    },
     {"documentId":null,"booked":false,"id":"SQ04","productId":"SQ04","productIds":null,"activityId":"WEBSQ",
       "start":"2019-03-04T18:00:00","end":"2019-03-04T18:40:00","type":"SQ04","color":"#FFD24F","name":"Squash Court 4",
       "count":0,"iconName":"squash1","places":"0","price":7,"available":false,"shortName":null,"colorMode":"dark",
-      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false}
+      "paid":false,"resourceGroupId":0,"location":null,"description":null,"canCancelUntil":null,"cantBeCancelled":false
+    }
   ]
   */
   async getCourtAvailablility(activityCode = "WEBSQ", start = "2019-03-02T08:00:00", end = "2019-03-02T08:40:00") {

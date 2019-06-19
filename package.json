@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "chai": "^4.2.0",
+    "chai-as-promised": "^7.1.1",
     "copyfiles": "^2.1.0",
     "gh-pages": "^2.0.1",
     "make-dir-cli": "^2.0.0",

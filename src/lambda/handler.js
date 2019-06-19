@@ -16,14 +16,18 @@ function addCorsHeaders(headers = {}) {
   return headers;
 }
 
-function errorResponse(err) {
+function errorResponse(err, payload) {
+  const message = err
+    ? err.message || err.toString()
+    : "There was an error";
   return {
     statusCode: 500,
     headers: addCorsHeaders(),
     body: JSON.stringify({
-      error: err
-        ? err.message || err.toString()
-        : "There was an error"
+      error: {
+        message,
+        payload: payload || err.data,
+      },
     }),
   };
 }
@@ -42,7 +46,8 @@ async function _getBookings(event, context) {
 
   const session = Session.withRealTransport();
 
-  const body = JSON.parse(event.body || "{}");
+  const eventOb = typeof event === "string" ? JSON.parse(event) : event;
+  const body = typeof eventOb.body === "string" ? JSON.parse(eventOb.body) : eventOb.body;
 
   const email = body.email || process.env[ENV_EMAIL];
   const password = body.password || process.env[ENV_PASSWORD];
@@ -60,22 +65,18 @@ async function _getBookings(event, context) {
 
   const startMillis = Date.now();
   const endMillis = startMillis + daysToMillis(7);
-  const bookingsStr = await session.getBookings({
+  const bookings = await session.getBookings({
     activityCode: ACTIVITY_CODES.WEBSQ,
     startMillis,
     endMillis,
   });
-  try {
-    const bookings = JSON.parse(bookingsStr);
-    console.log(`Found ${bookings.length} bookings`);
-  } catch (err) {
-    throw new Error(`Could not parse bookings: "${(bookingsStr || "").substring(0, 100)}..."`);
-  }
+
+  console.log(`Found ${bookings.length} bookings`);
 
   return {
     statusCode: 200,
     headers: addCorsHeaders(),
-    body: bookingsStr,
+    body: JSON.stringify(bookings),
   };
 };
 
