@@ -144,7 +144,10 @@
         method: "GET",
       };
 
-    const { fetch, loading, value: bookings, error: fetchError } = useFetchJson(bookingsEndpoint, opts);
+    const { fetch, loading, value, error: fetchError } = useFetchJson(bookingsEndpoint, opts);
+    const logicError = value && value.error;
+    const bookings = !logicError && value;
+    const error = logicError || fetchError;
 
     return (
       <React.Fragment>
@@ -152,7 +155,7 @@
         <div>password <input name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}></input></div>
         <div><button onClick={fetch}>Load</button></div>
         {loading && <div>Loading</div>}
-        {fetchError && <ErrorWidget error={fetchError} />}
+        {error && <ErrorWidget error={error} />}
         {bookings && <Bookings bookings={bookings} />}
       </React.Fragment>
     );
