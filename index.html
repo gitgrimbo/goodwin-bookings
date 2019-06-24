@@ -33,13 +33,9 @@
 <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
 <script src="./main.js" type="text/babel"></script>
 <script type="text/babel">
-const sampleEndpoints = [
-  "./sample-responses/unpaid-invoices.json",
-  "./sample-responses/squash.json",
-];
-const bookingsEndpoint = location.hostname === "localhost" ? sampleEndpoints[1] : undefined;
-console.log(bookingsEndpoint);
-ReactDOM.render(<App bookingsEndpoint={bookingsEndpoint}/>, document.getElementById("App"));
+const dev = location.hostname === "localhost";
+console.log(`dev=${dev}`);
+ReactDOM.render(<App dev={dev}/>, document.getElementById("App"));
 </script>
 
 </html>
