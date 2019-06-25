@@ -1,6 +1,9 @@
 import React from "react";
 import Bookings from "./Bookings";
 import ErrorWidget from "./ErrorWidget";
+import AsyncButton from "./AsyncButton";
+
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 
 const fetchJson = async (endpoint, opts) => {
   opts = opts || {};
@@ -96,10 +99,20 @@ function App({
 
   return (
     <React.Fragment>
-      <div>email <input name="email" value={email} onChange={(e) => setEmail(e.target.value)}></input></div>
-      <div>password <input name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}></input></div>
-      <div><button onClick={fetch}>Load</button></div>
-      {loading && <div>Loading</div>}
+      <table>
+        <tbody>
+          <tr>
+            <td>email</td>
+            <td><input name="email" value={email} onChange={(e) => setEmail(e.target.value)}></input></td>
+          </tr>
+          <tr>
+            <td>password</td>
+            <td><input name="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}></input></td>
+          </tr>
+        </tbody>
+      </table>
+      <div><AsyncButton onClick={fetch} loading={loading}>Load</AsyncButton></div>
+      <hr />
       {error && <ErrorWidget error={error} />}
       {bookings && <Bookings bookings={bookings} />}
     </React.Fragment>
