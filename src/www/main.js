@@ -3,21 +3,33 @@
   const fetchJson = async (endpoint, opts) => {
     opts = opts || {};
     const resp = await fetch(endpoint, opts);
-    if (resp.status !== 200) {
-      let message = await resp.text();
-      try {
-        const json = JSON.parse(text);
-        if (json.error) {
-          message = json.error;
-        }
-      } catch (err) {
-        // ignore
-      }
-      throw new Error(`status=${resp.status}, error=${message}, for endpoint=${endpoint}`);
+    const text = await resp.text();
+    let json = null;
+
+    try {
+      json = JSON.parse(text);
+    } catch (err) {
+      const e = new Error(`Could not parse JSON: response.body=${text}, for endpoint=${endpoint}`);
+      e.httpStatus = resp.status;
+      throw e;
     }
-    const value = await resp.json();
-    console.log(value);
-    return value;
+
+    if (typeof json.error === "undefined") {
+      return json;
+    }
+
+    // treat as error
+    if (typeof json.error === "string") {
+      const e = new Error(`error=${json.error}, for endpoint=${endpoint}`);
+      e.httpStatus = resp.status;
+      throw e;
+    } else {
+      const { message, payload } = json.error;
+      const e = new Error(`error=${message}, for endpoint=${endpoint}`);
+      e.data = payload;
+      e.httpStatus = resp.status;
+      throw e;
+    }
   };
 
   const useFetchJson = (endpoint, opts) => {
@@ -56,7 +68,9 @@
       fontWeight: "bold",
       border: "solid 2px red",
     };
-    const cssInner = {
+    const cssMessage = {
+    };
+    const cssData = {
     };
     const cssTitle = {
       border: "none",
@@ -65,11 +79,23 @@
     return (
       <div style={cssOuter}>
         <div style={cssTitle}>Error</div>
-        <span style={cssInner}>{
+        <div style={cssMessage}>{
           error
             ? error.message || error.toString()
             : "There was an error"
-        }</span>
+        }</div>
+        {
+          (error && error.httpStatus) && (
+            <div style={cssMessage}>{`http.status=${error.httpStatus}`}</div>
+          )
+        }
+        {
+          (error && error.data) && (
+            <pre style={cssData}>{
+              JSON.stringify(error.data, null, 1)
+            }</pre>
+          )
+        }
       </div>
     )
   }
@@ -123,25 +149,31 @@
   }
 
   function App({
-    bookingsEndpoint,
+    dev = false,
   }) {
     const prodEndpoint = "https://1e53hmg02i.execute-api.eu-west-2.amazonaws.com/prod/getBookings";
-    bookingsEndpoint = bookingsEndpoint || prodEndpoint;
+
+    const sampleEndpoints = [
+      "./sample-responses/unpaid-invoices.json",
+      "./sample-responses/squash.json",
+    ];
+
+    const bookingsEndpoint = dev ? sampleEndpoints[0] : prodEndpoint;
 
     const [email, setEmail] = React.useState("");
     const [password, setPassword] = React.useState("");
 
-    const opts = (bookingsEndpoint === prodEndpoint)
+    const opts = dev
       ? {
+        method: "GET",
+      }
+      : {
         mode: "cors",
         method: "POST",
         body: JSON.stringify({
           email: email || undefined,
           password: password || undefined,
         }),
-      }
-      : {
-        method: "GET",
       };
 
     const { fetch, loading, value, error: fetchError } = useFetchJson(bookingsEndpoint, opts);
