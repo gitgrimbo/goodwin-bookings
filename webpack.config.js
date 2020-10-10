@@ -36,4 +36,10 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, "src/www"),
   },
+  node: {
+    console: true,
+    fs: "empty",
+    net: "empty",
+    tls: "empty"
+  }
 };

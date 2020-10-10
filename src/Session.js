@@ -2,6 +2,7 @@ const rpn = require("request-promise-native");
 
 const ACTIVITY_CODES = {
   WEBSQ: "WEBSQ",
+  SWPOOL: "HO/SWPOOL",
 };
 
 class Session {
@@ -69,7 +70,9 @@ class Session {
    *     activityCode = "WEBSQ",
    *     start = undefined,
    *     end = undefined,
+   *     groupslots = false,
    *   }
+   *   `groupslots` is a new parameter for the new booking system (noticed 09/10/2020)
    * @returns {string} The raw bookings response.
    * 
    * @memberof Session
@@ -78,6 +81,7 @@ class Session {
     activityCode = "WEBSQ",
     start = undefined,
     end = undefined,
+    groupslots = false,
   }) {
     if (!start) throw new Error(`start is mandatory`);
     if (!end) throw new Error(`end is mandatory`);
@@ -87,8 +91,12 @@ class Session {
       end,
       _: Date.now(),
     };
+    let uri = this.uri(`/online/bookings/slots/${activityCode}`);
+    if (groupslots) {
+      uri = this.uri(`/online/bookings/groupslots/${activityCode}`);
+    }
     return this.req({
-      uri: this.uri(`/online/bookings/slots/${activityCode}`),
+      uri,
       qs,
     });
   }
@@ -164,6 +172,7 @@ class Session {
     end = undefined,
     startMillis = undefined,
     endMillis = undefined,
+    groupslots = false,
   }) {
     activityCode = this.requiredParam(activityCode, "activityCode");
     start = this.dateParam(start, "start", startMillis, "startMillis");
@@ -173,6 +182,7 @@ class Session {
       activityCode,
       start,
       end,
+      groupslots,
     });
 
     let bookings = null;

@@ -51,6 +51,8 @@ async function _getBookings(event, context) {
 
   const email = body.email || process.env[ENV_EMAIL];
   const password = body.password || process.env[ENV_PASSWORD];
+  const activityCode = body.activityCode || ACTIVITY_CODES.WEBSQ;
+  const groupslots = activityCode === ACTIVITY_CODES.SWPOOL;
 
   if (!email) {
     throw new Error(`email is required. either as request.body.email or as env var: "${ENV_EMAIL}"`);
@@ -66,9 +68,10 @@ async function _getBookings(event, context) {
   const startMillis = Date.now();
   const endMillis = startMillis + daysToMillis(7);
   const bookings = await session.getBookings({
-    activityCode: ACTIVITY_CODES.WEBSQ,
+    activityCode,
     startMillis,
     endMillis,
+    groupslots,
   });
 
   console.log(`Found ${bookings.length} bookings`);

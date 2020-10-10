@@ -1,6 +1,6 @@
 import React from "react";
 
-function Bookings({ bookings }) {
+function Bookings({ heading, bookings }) {
   let lastDate = null;
   const activityNames = bookings.reduce((names, booking) => {
     if (names.indexOf(booking.name) < 0) {
@@ -8,6 +8,7 @@ function Bookings({ bookings }) {
     }
     return names;
   }, []);
+  const htmlHeading = heading || activityNames.join(", ");
   return (
     <React.Fragment>
       <style>
@@ -19,7 +20,7 @@ function Bookings({ bookings }) {
           }
           `}
       </style>
-      <h1>{activityNames.join(", ")}</h1>
+      <h1>{htmlHeading}</h1>
       <table className="bookings">
         <tbody>
           {
